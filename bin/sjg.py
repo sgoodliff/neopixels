@@ -13,7 +13,7 @@ LED_PIN = 18          # GPIO pin connected to the pixels (18 uses PWM!).
 # LED_PIN = 10        # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
 LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
 LED_DMA = 10          # DMA channel to use for generating signal (try 10)
-LED_BRIGHTNESS = 128  # Set to 0 for darkest and 255 for brightest
+LED_BRIGHTNESS = 64  # Set to 0 for darkest and 255 for brightest
 LED_INVERT = False    # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
@@ -32,6 +32,62 @@ def randomColor():
 	return Color(r,g,b)
 
 # Define functions which animate LEDs in various ways.
+
+def doubleWhoosh(strip,color,wait_ms=50):
+   gap = 10
+   a = randomColor()
+   b = randomColor()
+   c = randomColor()
+   for i in range(strip.numPixels()):
+
+
+       strip.setPixelColor(i, a)
+       strip.setPixelColor( gap + i, b)
+       strip.setPixelColor( gap + gap +i , c)  
+
+       strip.show()
+       time.sleep(wait_ms / 1000.0)
+
+       strip.setPixelColor(i - 1, Color(0,0,0))
+       strip.setPixelColor( (gap + i) -  1, Color(0,0,0)) 
+       strip.setPixelColor( (gap + gap + i) -  1, Color(0,0,0))
+
+
+def test(strip,gap=20,wait_ms=20):
+
+    for i in range(strip.numPixels()):
+
+        strip.setPixelColor(i,randomColor())    
+        strip.setPixelColor(gap + i,randomColor())
+        strip.setPixelColor(gap + gap + i,randomColor()) 
+       
+        strip.show() 
+        time.sleep(wait_ms / 1000.0)
+
+        strip.setPixelColor(i - 1, Color(0,0,0))
+        strip.setPixelColor( (gap + i) -  1, Color(0,0,0))
+        strip.setPixelColor( (gap + gap + i) -  1, Color(0,0,0))
+        print("finish")
+
+def whoosh(strip,color,reverse=False,wait_ms=50):
+
+   if reverse == False:
+        for i in range(strip.numPixels()):
+             strip.setPixelColor(i, color)
+             strip.setPixelColor(i + 1,color)
+
+             strip.show()
+             time.sleep(wait_ms / 1000.0)
+             strip.setPixelColor(i - 1, Color(0, 0, 0))
+
+   else:
+       for i in reversed(range(strip.numPixels())):
+             strip.setPixelColor(i, color)
+             strip.setPixelColor(i - 1,color)
+             strip.show()
+             time.sleep(wait_ms / 1000.0)
+             strip.setPixelColor(i + 1, Color(0, 0, 0))
+
 def stripe(strip, color_low,color_high, wait_ms=50):
 
 	leds = strip.numPixels()		
@@ -45,6 +101,25 @@ def stripe(strip, color_low,color_high, wait_ms=50):
 
 		time.sleep(wait_ms / 1000.0)
 
+def stripeBrightness(strip, wait_ms=100):
+
+    leds = strip.numPixels()
+
+    for i in range(strip.numPixels()):
+
+        r = random.randint(0,255)
+        g = random.randint(0,255)
+        b = random.randint(0,255)
+
+        #print(str(r) + '/' + str(g) + '/' + str(b) )
+
+        strip.setPixelColor(i, Color(r,g,b))
+        strip.show()
+
+        strip.setPixelColor(leds - i,Color(r,g,b))
+        strip.show()
+
+        time.sleep(wait_ms / 1000.0) 
 
 # Define functions which animate LEDs in various ways.
 def colorWipe(strip, color, wait_ms=50,reverse=False):
@@ -116,11 +191,41 @@ def theaterChaseRainbow(strip, wait_ms=50):
                 strip.setPixelColor(i + q, 0)
 
 
+def routine():
+
+	print('whoosh')
+	doubleWhoosh(strip,randomColor())
+	whoosh(strip,randomColor())
+	whoosh(strip,randomColor(),True)
+
+	print('stripe animation')
+	stripe(strip,randomColor(),randomColor())
+
+	print('Color wipe animations.')
+	colorWipe(strip, Color(255, 0, 0),100)  # Red wipe
+	colorWipe(strip, Color(0,255,0),100,True)
+
+	colorWipe(strip, Color(0, 0, 255),100)  # Green wipe
+	colorWipe(strip, Color(255, 0, 0),100,True)  # Blue wipe
+
+	print('Theater chase animations.')
+	theaterChase(strip, Color(127, 127, 127),100)  # White theater chase
+	theaterChase(strip,Color(0,0,127),100)
+
+	theaterChase(strip, Color(127, 0, 0))  # Red theater chase
+	theaterChase(strip, Color(0, 0, 127))  # Blue theater chase
+	print('Rainbow animations.')
+	rainbow(strip)
+	rainbowCycle(strip)
+	theaterChaseRainbow(strip)
+
 # Main program logic follows:
 if __name__ == '__main__':
     # Process arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--clear', action='store_true', help='clear the display on exit')
+    parser.add_argument('-l', '--loop', action='store_true', help='loop')
+
     args = parser.parse_args()
 
     signal.signal(signal.SIGTERM,exit_handler)
@@ -140,28 +245,14 @@ if __name__ == '__main__':
 
     try:
 
-        while True:
-            print('stripe animation')
-            stripe(strip,randomColor(),randomColor())
-
-            print('Color wipe animations.')
-            colorWipe(strip, Color(255, 0, 0),100)  # Red wipe
-            colorWipe(strip, Color(0,255,0),100,True)
-
-            colorWipe(strip, Color(0, 0, 255),100)  # Green wipe
-            colorWipe(strip, Color(255, 0, 0),100,True)  # Blue wipe
-
-            print('Theater chase animations.')
-            theaterChase(strip, Color(127, 127, 127),100)  # White theater chase
-            theaterChase(strip,Color(0,0,127),100)
-
-            theaterChase(strip, Color(127, 0, 0))  # Red theater chase
-            theaterChase(strip, Color(0, 0, 127))  # Blue theater chase
-            print('Rainbow animations.')
-            rainbow(strip)
-            rainbowCycle(strip)
-            theaterChaseRainbow(strip)
+        if args.loop:
+            while True:
+                 print("looping")
+                 routine()
+        else:
+            stripeBrightness(strip)
+            #test(strip)
 
     except KeyboardInterrupt:
-	if args.clear:
-		colorWipe(strip, Color(0, 0, 0), 10)
+        if args.clear:
+           colorWipe(strip, Color(0, 0, 0), 10)
