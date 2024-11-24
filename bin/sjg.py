@@ -8,12 +8,12 @@ from rpi_ws281x import PixelStrip, Color
 import argparse
 
 # LED strip configuration:
-LED_COUNT = 200        # Number of LED pixels.
+LED_COUNT = 297        # Number of LED pixels.
 LED_PIN = 18          # GPIO pin connected to the pixels (18 uses PWM!).
 # LED_PIN = 10        # GPIO pin connected to the pixels (10 uses SPI /dev/spidev0.0).
 LED_FREQ_HZ = 800000  # LED signal frequency in hertz (usually 800khz)
 LED_DMA = 10          # DMA channel to use for generating signal (try 10)
-LED_BRIGHTNESS = 64  # Set to 0 for darkest and 255 for brightest
+LED_BRIGHTNESS = 128  # Set to 0 for darkest and 255 for brightest
 LED_INVERT = False    # True to invert the signal (when using NPN transistor level shift)
 LED_CHANNEL = 0       # set to '1' for GPIOs 13, 19, 41, 45 or 53
 
@@ -28,7 +28,7 @@ def randomColor():
 	r = random.randint(0,255) 
 	g = random.randint(0,255)
 	b = random.randint(0,255)
-	print(str(r) + '/' + str(g) + '/' + str(b) )
+	#print(str(r) + '/' + str(g) + '/' + str(b) )
 	return Color(r,g,b)
 
 # Define functions which animate LEDs in various ways.
@@ -106,7 +106,6 @@ def stripeBrightness(strip, wait_ms=100):
     leds = strip.numPixels()
 
     for i in range(strip.numPixels()):
-
         r = random.randint(0,255)
         g = random.randint(0,255)
         b = random.randint(0,255)
@@ -118,7 +117,6 @@ def stripeBrightness(strip, wait_ms=100):
 
         strip.setPixelColor(leds - i,Color(r,g,b))
         strip.show()
-
         time.sleep(wait_ms / 1000.0) 
 
 # Define functions which animate LEDs in various ways.
@@ -194,9 +192,9 @@ def theaterChaseRainbow(strip, wait_ms=50):
 def routine():
 
 	print('whoosh')
-	doubleWhoosh(strip,randomColor())
-	whoosh(strip,randomColor())
-	whoosh(strip,randomColor(),True)
+	doubleWhoosh(strip,randomColor(),25)
+	whoosh(strip,randomColor(),False,25)
+	whoosh(strip,randomColor(),True,25)
 
 	print('stripe animation')
 	stripe(strip,randomColor(),randomColor())
