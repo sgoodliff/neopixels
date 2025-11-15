@@ -6,6 +6,9 @@ import signal
 import random
 from rpi_ws281x import PixelStrip, Color
 import argparse
+import logging
+
+logger = logging.getLogger(__name__)
 
 # LED strip configuration:
 LED_COUNT = 297        # Number of LED pixels.
@@ -219,6 +222,15 @@ def routine():
 
 # Main program logic follows:
 if __name__ == '__main__':
+
+    logging.basicConfig(
+        format='%(asctime)s %(levelname)-8s %(message)s',
+        level=logging.INFO,
+        datefmt='%Y-%m-%d %H:%M:%S',
+        filename='sjg.log')
+
+    logger.info('Starting')
+
     # Process arguments
     parser = argparse.ArgumentParser()
     parser.add_argument('-c', '--clear', action='store_true', help='clear the display on exit')
@@ -229,7 +241,7 @@ if __name__ == '__main__':
     signal.signal(signal.SIGTERM,exit_handler)
 
     pid = str(os.getppid())
-    with open('/var/run/sjg.pid','w') as file:
+    with open('/var/run/pavement/sjg.pid','w') as file:
           file.write(pid)
 
     # Create NeoPixel object with appropriate configuration.
@@ -246,11 +258,16 @@ if __name__ == '__main__':
         if args.loop:
             while True:
                  print("looping")
-                 routine()
+                 #routine()
         else:
             #stripeBrightness(strip)
             test(strip)
 
     except KeyboardInterrupt:
         if args.clear:
-           colorWipe(strip, Color(0, 0, 0), 10)
+            logger.info('Clearing')
+            colorWipe(strip, Color(0, 0, 0), 10)
+            logger.info('Finished'
+
+       )
+
